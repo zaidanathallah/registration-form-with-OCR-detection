@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Admin</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+
+      /* Styling untuk modal header */
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        position: relative;
+      }
+
+      .modal-header h2 {
+        margin: 0;
+        color: #333;
+        flex-grow: 1;
+        text-align: left; /* Ubah ke left */
+        border-bottom: none; /* Hapus garis bawah */
+        padding-bottom: 0; /* Hapus padding bawah */
+      }
+
+      /* Perbaiki tampilan tombol close */
+      .modal-header .close {
+        font-size: 20px;
+        font-weight: bold;
+        color: #666;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+
+      /* Hapus CSS yang bertentangan */
+      #editModal .close {
+        position: relative; /* Ubah ke relative */
+        right: auto;
+        top: auto;
+      }
+
+      /* Perbaiki modal content */
+      #editModal .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        max-width: 500px;
+        margin: 20px auto;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        border-color: #4caf50;
+        outline: none;
+      }
+
+      .form-group textarea {
+        height: 100px;
+        resize: vertical;
+      }
+
+      .btn-save {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+      }
+
+      .btn-save:hover {
+        background-color: #45a049;
+      }
+
+      /* Perbaikan modal edit */
+      #editModal .modal-content {
+        max-width: 500px;
+        padding: 25px;
+      }
+
+      #editModal h2 {
+        margin: 0 0 20px 0;
+        color: #333;
+        text-align: center;
+        padding-bottom: 10px;
+      }
+
+      #editModal .close {
+        position: absolute;
+        right: 15px;
+
+        font-size: 28px;
+        font-weight: bold;
+        color: #666;
+      }
+
+      #editModal .close:hover {
+        color: #333;
+        text-decoration: none;
+      }
+      /* Tambahkan setelah CSS yang ada */
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        border-radius: 4px;
+      }
+
+      .dropdown-content button {
+        width: 100%;
+        padding: 12px 16px;
+        text-align: left;
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: black;
+        display: block;
+      }
+
+      .dropdown-content button:hover {
+        background-color: #f1f1f1;
+      }
+
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+
+      .action-btn {
+        background-color: #4caf50;
+        color: white;
+        padding: 8px;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      .action-btn:hover {
+        background-color: #45a049;
+      }
+      .btn-edit {
+        background-color: #2196f3;
+        color: white;
+        margin-right: 5px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .controls {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .column-toggle {
+        display: flex;
+        gap: 10px;
+      }
+
+      .column-toggle label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .btn-view {
+        background-color: #2196f3;
+        color: white;
+      }
+
+      .btn-delete {
+        background-color: #f44336;
+        color: white;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        cursor: pointer;
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        width: 80%;
+        max-width: 600px;
+        border-radius: 8px;
+        cursor: auto;
+      }
+
+      .close {
+        float: right;
+        cursor: pointer;
+        font-size: 24px;
+      }
+
+      #imagePreview {
+        max-width: 100%;
+        margin-top: 10px;
+      }
+
+      /* Tambahkan CSS untuk responsif */
+      @media screen and (max-width: 768px) {
+        .container {
+          padding: 10px;
+          margin: 10px;
+        }
+
+        .controls {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .column-toggle {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        table {
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
+        }
+
+        th,
+        td {
+          padding: 8px;
+          font-size: 14px;
+        }
+
+        .btn-view,
+        .btn-delete {
+          padding: 6px 8px;
+          font-size: 12px;
+        }
+
+        /* Modal responsif */
+        .modal-content {
+          width: 95%;
+          margin: 5% auto;
+          padding: 10px;
+          cursor: auto;
+        }
+
+        h1 {
+          font-size: 24px;
+          margin-bottom: 20px;
+        }
+
+        #editModal .modal-content {
+          width: 90%;
+          padding: 15px;
+          margin: 20px auto;
+        }
+
+        .form-group label {
+          font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+          font-size: 14px;
+          padding: 6px;
+        }
+
+        .btn-save {
+          padding: 8px 16px;
+          font-size: 14px;
+        }
+      }
+
+      .dropdown-content {
+        right: auto;
+        left: 0;
+      }
+
+      .action-btn {
+        padding: 6px;
+        font-size: 12px;
+      }
+
+      /* Untuk layar sangat kecil */
+      @media screen and (max-width: 480px) {
+        body {
+          padding: 10px;
+        }
+
+        .dropdown {
+          position: static; /* Ubah ke static untuk menghindari masalah positioning */
+        }
+
+        .dropdown-content {
+          position: absolute;
+          left: auto;
+          right: 10px; /* Berikan jarak dari kanan */
+          min-width: 120px; /* Kurangi lebar minimum */
+          z-index: 1000; /* Tingkatkan z-index */
+        }
+
+        .action-btn {
+          padding: 6px 12px; /* Tambah padding horizontal */
+          font-size: 14px; /* Perbesar font sedikit */
+          width: auto; /* Biarkan lebar menyesuaikan konten */
+          white-space: nowrap; /* Hindari pemisahan teks */
+          display: inline-block; /* Ubah display */
+          background-color: #4caf50; /* Pastikan warna tetap terlihat */
+          margin: 2px 0; /* Tambah margin vertikal */
+        }
+
+        .dropdown-content button {
+          padding: 8px 12px; /* Sesuaikan padding */
+          font-size: 14px; /* Sesuaikan ukuran font */
+        }
+
+        #editModal .modal-content {
+          margin: 10px;
+          padding: 15px;
+          width: 90%;
+        }
+
+        #editModal h2 {
+          font-size: 18px;
+        }
+
+        .form-group {
+          margin-bottom: 10px;
+        }
+
+        .form-group label {
+          font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+          padding: 6px 10px;
+        }
+
+        .btn-save {
+          padding: 8px 16px;
+          font-size: 14px;
+        }
+      }
+      .container {
+        padding: 5px;
+        margin: 5px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      th,
+      td {
+        padding: 6px;
+        font-size: 12px;
+      }
+
+      .column-toggle label {
+        font-size: 12px;
+      }
+
+      /* Styling untuk pagination */
+      .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 10px 0;
+        border-top: 1px solid #ddd;
+      }
+
+      .pagination-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .page-link,
+      .page-number {
+        padding: 8px 12px;
+        background-color: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        min-width: 15px;
+      }
+
+      .page-link:hover,
+      .page-number:hover {
+        background-color: #e0e0e0;
+      }
+
+      .page-number.active {
+        background-color: #4caf50;
+        color: white;
+        border-color: #4caf50;
+      }
+
+      .page-numbers {
+        display: flex;
+        gap: 5px;
+      }
+
+      .pagination-info {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .goto-page {
+        margin-left: 10px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .page-input {
+        width: 50px;
+        padding: 6px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      .go-btn {
+        padding: 6px 12px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .go-btn:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+
+      @media screen and (max-width: 768px) {
+        .pagination {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .pagination-controls {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Dashboard Admin</h1>
+
+      <div class="controls">
+        <div class="column-toggles">
+          <span>Tampilkan kolom: </span>
+          <label class="column-toggle">
+            <input
+              type="checkbox"
+              data-column="nik"
+              data-field="nik"
+              checked
+            />
+            NIK
+          </label>
+          <label class="column-toggle">
+            <input
+              type="checkbox"
+              data-column="ktp"
+              data-field="foto_ktp"
+              checked
+            />
+            Foto KTP
+          </label>
+          <label class="column-toggle">
+            <input
+              type="checkbox"
+              data-column="pasfoto"
+              data-field="pas_foto"
+              checked
+            />
+            Pas Foto
+          </label>
+          <label class="column-toggle">
+            <input
+              type="checkbox"
+              data-column="tgl_lahir"
+              data-field="tgl_lahir"
+              checked
+            />
+            Tanggal Lahir
+          </label>
+          <label class="column-toggle">
+            <input
+              type="checkbox"
+              data-column="alamat"
+              data-field="alamat"
+              checked
+            />
+            Alamat
+          </label>
+          <label class="column-toggle">
+            <input
+              type="checkbox"
+              data-column="no_hp"
+              data-field="no_hp"
+              checked
+            />
+            No HP
+          </label>
+        </div>
+      </div>
+
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>Tanggal Input</th>
+            <th>Nama</th>
+            <th class="col-nik">NIK</th>
+            <th class="col-ktp">Foto KTP</th>
+            <th class="col-pasfoto">Pas Foto</th>
+            <th class="col-tgl_lahir">Tanggal Lahir</th>
+            <th class="col-alamat">Alamat</th>
+            <th class="col-no_hp">No HP</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+
+      <div id="pagination" class="pagination">
+        <div class="pagination-info">
+          <span id="dataInfo">Menampilkan 0-0 dari 0 data</span>
+        </div>
+        <div class="pagination-controls">
+          <a href="#" id="prevPage" class="page-link">&lt;</a>
+          <div id="pageNumbers" class="page-numbers"></div>
+          <a href="#" id="nextPage" class="page-link">&gt;</a>
+          <span class="goto-page">Go to page</span>
+          <input
+            type="number"
+            id="pageInput"
+            min="1"
+            value="1"
+            class="page-input"
+            title="Page number input"
+            placeholder="Enter page number"
+            aria-label="Go to page number"
+          />
+          <button id="goToPageBtn" class="go-btn">Go</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal untuk menampilkan gambar -->
+    <div id="imageModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <img id="imagePreview" />
+      </div>
+    </div>
+
+    <!-- Modal untuk edit data -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Data</h2>
+          <span class="close">&times;</span>
+        </div>
+        <form id="editForm">
+          <div class="form-group">
+            <label for="edit_nama">Nama:</label>
+            <input type="text" id="edit_nama" required />
+          </div>
+          <div class="form-group">
+            <label for="edit_nik">NIK:</label>
+            <input type="text" id="edit_nik" required pattern="[0-9]{16}" />
+          </div>
+          <div class="form-group">
+            <label for="edit_tgl_lahir">Tanggal Lahir:</label>
+            <input type="date" id="edit_tgl_lahir" required />
+          </div>
+          <div class="form-group">
+            <label for="edit_alamat">Alamat:</label>
+            <textarea id="edit_alamat" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit_no_hp">No HP:</label>
+            <input type="tel" id="edit_no_hp" required pattern="[0-9]{10,13}" />
+          </div>
+          <button type="submit" class="btn-save">Simpan Perubahan</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Variabel untuk pagination
+      let currentPage = 1;
+      let itemsPerPage = 5;
+      let allData = [];
+
+      // Fungsi untuk memuat data dari Google Sheets
+      async function loadData() {
+        try {
+          // Buat elemen script untuk JSONP
+          const script = document.createElement("script");
+          const callbackName =
+            "jsonpCallback_" + Math.round(Math.random() * 1000000);
+
+          // Definisikan callback function
+          window[callbackName] = function (data) {
+            if (Array.isArray(data)) {
+              allData = data; // Simpan semua data
+              updatePagination(); // Update pagination
+              displayPageData(); // Tampilkan data halaman saat ini
+            } else {
+              console.error("Data bukan array:", data);
+              displayPageData();
+            }
+            // Hapus script dan callback setelah selesai
+            document.body.removeChild(script);
+            delete window[callbackName];
+          };
+
+          // Set URL dengan callback
+          script.src = `https://script.google.com/macros/s/AKfycbzTSe1XSCn4UyOaPT28Bvp4CRBrh2Zk_mdHzYbcdh34DCGfFG5UuQVhbDQl02i9Xc9SMA/exec?action=getData&callback=${callbackName}`;
+
+          // Tambahkan script ke body
+          document.body.appendChild(script);
+
+          // Handle error
+          script.onerror = function () {
+            console.error("Error loading data");
+            alert("Gagal memuat data");
+            displayPageData();
+            document.body.removeChild(script);
+            delete window[callbackName];
+          };
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Gagal memuat data: " + error.message);
+          displayPageData();
+        }
+      }
+
+      // Fungsi untuk update informasi pagination
+      function updatePagination() {
+        const totalItems = allData.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const startItem = (currentPage - 1) * itemsPerPage + 1;
+        const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+        // Update info pagination
+        document.getElementById("dataInfo").textContent = `Menampilkan ${
+          totalItems > 0 ? startItem : 0
+        }-${endItem} dari ${totalItems} data`;
+
+        // Update status tombol
+        document
+          .getElementById("prevPage")
+          .classList.toggle("disabled", currentPage === 1);
+        document
+          .getElementById("nextPage")
+          .classList.toggle("disabled", currentPage >= totalPages);
+
+        // Update input page
+        document.getElementById("pageInput").value = currentPage;
+        document.getElementById("pageInput").max = totalPages;
+
+        // Generate page numbers
+        generatePageNumbers(totalPages);
+      }
+
+      // Fungsi untuk generate angka halaman
+      function generatePageNumbers(totalPages) {
+        const pageNumbersContainer = document.getElementById("pageNumbers");
+        pageNumbersContainer.innerHTML = "";
+
+        // Tentukan range halaman yang akan ditampilkan
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+
+        // Jika kurang dari 5 halaman, sesuaikan
+        if (endPage - startPage < 4) {
+          startPage = Math.max(1, endPage - 4);
+        }
+
+        // Tambahkan tombol halaman pertama jika tidak dimulai dari halaman 1
+        if (startPage > 1) {
+          addPageNumber(1, pageNumbersContainer);
+          if (startPage > 2) {
+            // Tambahkan elipsis jika ada gap
+            const ellipsis = document.createElement("span");
+            ellipsis.textContent = "...";
+            ellipsis.className = "page-ellipsis";
+            pageNumbersContainer.appendChild(ellipsis);
+          }
+        }
+
+        // Tambahkan angka halaman
+        for (let i = startPage; i <= endPage; i++) {
+          addPageNumber(i, pageNumbersContainer);
+        }
+
+        // Tambahkan tombol halaman terakhir jika tidak berakhir di halaman terakhir
+        if (endPage < totalPages) {
+          if (endPage < totalPages - 1) {
+            // Tambahkan elipsis jika ada gap
+            const ellipsis = document.createElement("span");
+            ellipsis.textContent = "...";
+            ellipsis.className = "page-ellipsis";
+            pageNumbersContainer.appendChild(ellipsis);
+          }
+          addPageNumber(totalPages, pageNumbersContainer);
+        }
+      }
+
+      // Fungsi untuk menambahkan tombol angka halaman
+      function addPageNumber(pageNum, container) {
+        const pageLink = document.createElement("a");
+        pageLink.href = "#";
+        pageLink.textContent = pageNum;
+        pageLink.className =
+          "page-number" + (pageNum === currentPage ? " active" : "");
+        pageLink.addEventListener("click", function (e) {
+          e.preventDefault();
+          currentPage = pageNum;
+          displayPageData();
+        });
+        container.appendChild(pageLink);
+      }
+
+      // Fungsi untuk menampilkan data halaman saat ini
+      function displayPageData() {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, allData.length);
+        const currentPageData = allData.slice(startIndex, endIndex);
+
+        displayData(currentPageData);
+        updatePagination();
+      }
+
+      // Event listener untuk tombol pagination
+      document
+        .getElementById("prevPage")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          if (currentPage > 1) {
+            currentPage--;
+            displayPageData();
+          }
+        });
+
+      document
+        .getElementById("nextPage")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          const totalPages = Math.ceil(allData.length / itemsPerPage);
+          if (currentPage < totalPages) {
+            currentPage++;
+            displayPageData();
+          }
+        });
+
+      // Event listener untuk tombol Go
+      document
+        .getElementById("goToPageBtn")
+        .addEventListener("click", function () {
+          const pageInput = document.getElementById("pageInput");
+          const pageNum = parseInt(pageInput.value);
+          const totalPages = Math.ceil(allData.length / itemsPerPage);
+
+          if (pageNum >= 1 && pageNum <= totalPages) {
+            currentPage = pageNum;
+            displayPageData();
+          } else {
+            alert(`Masukkan nomor halaman antara 1 dan ${totalPages}`);
+            pageInput.value = currentPage;
+          }
+        });
+
+      // Event listener untuk input halaman (ketika user menekan Enter)
+      document
+        .getElementById("pageInput")
+        .addEventListener("keyup", function (e) {
+          if (e.key === "Enter") {
+            document.getElementById("goToPageBtn").click();
+          }
+        });
+
+      // Fungsi untuk menampilkan data dalam tabel
+      function displayData(data) {
+        const tableBody = document.getElementById("tableBody");
+        tableBody.innerHTML = "";
+
+        // Dapatkan status checkbox untuk setiap kolom
+        const showNIK = document.querySelector(
+          'input[data-column="nik"]'
+        ).checked;
+        const showKTP = document.querySelector(
+          'input[data-column="ktp"]'
+        ).checked;
+        const showPasFoto = document.querySelector(
+          'input[data-column="pasfoto"]'
+        ).checked;
+        const showTglLahir = document.querySelector(
+          'input[data-column="tgl_lahir"]'
+        ).checked;
+        const showAlamat = document.querySelector(
+          'input[data-column="alamat"]'
+        ).checked;
+        const showNoHP = document.querySelector(
+          'input[data-column="no_hp"]'
+        ).checked;
+
+        // Terapkan status tampilan pada header tabel
+        document
+          .querySelectorAll(".col-nik")
+          .forEach((cell) => (cell.style.display = showNIK ? "" : "none"));
+        document
+          .querySelectorAll(".col-ktp")
+          .forEach((cell) => (cell.style.display = showKTP ? "" : "none"));
+        document
+          .querySelectorAll(".col-pasfoto")
+          .forEach((cell) => (cell.style.display = showPasFoto ? "" : "none"));
+        document
+          .querySelectorAll(".col-tgl_lahir")
+          .forEach((cell) => (cell.style.display = showTglLahir ? "" : "none"));
+        document
+          .querySelectorAll(".col-alamat")
+          .forEach((cell) => (cell.style.display = showAlamat ? "" : "none"));
+        document
+          .querySelectorAll(".col-no_hp")
+          .forEach((cell) => (cell.style.display = showNoHP ? "" : "none"));
+
+        data.forEach((row, index) => {
+          const tr = document.createElement("tr");
+
+          // Format tanggal input
+          const tglInput = row.tgl_input || "-";
+
+          // Tambahkan sel untuk tanggal input
+          const tdTglInput = document.createElement("td");
+          tdTglInput.textContent = tglInput;
+          tr.appendChild(tdTglInput);
+
+          // Tambahkan sel untuk nama
+          const tdNama = document.createElement("td");
+          tdNama.textContent = row.nama || "-";
+          tr.appendChild(tdNama);
+
+          // Tambahkan sel untuk NIK dengan class col-nik
+          const tdNIK = document.createElement("td");
+          tdNIK.className = "col-nik";
+          tdNIK.textContent = row.nik || "-";
+          tdNIK.style.display = showNIK ? "" : "none";
+          tr.appendChild(tdNIK);
+
+          // Tambahkan sel untuk Foto KTP dengan class col-ktp
+          const tdKTP = document.createElement("td");
+          tdKTP.className = "col-ktp";
+          tdKTP.style.display = showKTP ? "" : "none";
+
+          if (row.foto_ktp) {
+            const btnKTP = document.createElement("button");
+            btnKTP.textContent = "Lihat KTP";
+            btnKTP.className = "btn-view";
+            btnKTP.onclick = function () {
+              showImage(row.foto_ktp);
+            };
+            tdKTP.appendChild(btnKTP);
+          } else {
+            tdKTP.textContent = "Tidak ada gambar";
+          }
+          tr.appendChild(tdKTP);
+
+          // Tambahkan sel untuk Pas Foto dengan class col-pasfoto
+          const tdPasFoto = document.createElement("td");
+          tdPasFoto.className = "col-pasfoto";
+          tdPasFoto.style.display = showPasFoto ? "" : "none";
+
+          if (row.pas_foto) {
+            const btnPasFoto = document.createElement("button");
+            btnPasFoto.textContent = "Lihat Pas Foto";
+            btnPasFoto.className = "btn-view";
+            btnPasFoto.onclick = function () {
+              showImage(row.pas_foto);
+            };
+            tdPasFoto.appendChild(btnPasFoto);
+          } else {
+            tdPasFoto.textContent = "Tidak ada gambar";
+          }
+          tr.appendChild(tdPasFoto);
+
+          // Format tanggal lahir
+          let tglLahir = "-";
+          if (row.tgl_lahir) {
+            // Hapus string 'undefined' jika ada
+            const cleanDate = row.tgl_lahir.replace("undefined-", "");
+            if (cleanDate.includes("-")) {
+              const [year, month, day] = cleanDate.split("-");
+              tglLahir = `${day}/${month}/${year}`;
+            } else {
+              tglLahir = cleanDate;
+            }
+          }
+
+          // Tambahkan sel untuk Tanggal Lahir dengan class col-tgl_lahir
+          const tdTglLahir = document.createElement("td");
+          tdTglLahir.className = "col-tgl_lahir";
+          tdTglLahir.textContent = tglLahir;
+          tdTglLahir.style.display = showTglLahir ? "" : "none";
+          tr.appendChild(tdTglLahir);
+
+          // Tambahkan sel untuk Alamat dengan class col-alamat
+          const tdAlamat = document.createElement("td");
+          tdAlamat.className = "col-alamat";
+          tdAlamat.textContent = row.alamat || "-";
+          tdAlamat.style.display = showAlamat ? "" : "none";
+          tr.appendChild(tdAlamat);
+
+          // Tambahkan sel untuk No HP dengan class col-no_hp
+          const tdNoHP = document.createElement("td");
+          tdNoHP.className = "col-no_hp";
+          tdNoHP.textContent = row.no_hp || "-";
+          tdNoHP.style.display = showNoHP ? "" : "none";
+          tr.appendChild(tdNoHP);
+
+          // Tambahkan sel untuk Aksi
+          const tdAksi = document.createElement("td");
+
+          // Buat dropdown untuk aksi
+          const dropdown = document.createElement("div");
+          dropdown.className = "dropdown";
+
+          const actionBtn = document.createElement("button");
+          actionBtn.textContent = "action ▼";
+          actionBtn.className = "action-btn";
+          dropdown.appendChild(actionBtn);
+
+          const dropdownContent = document.createElement("div");
+          dropdownContent.className = "dropdown-content";
+
+          // Tombol Edit
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "Edit";
+          editBtn.onclick = function () {
+            editData(index);
+          };
+          dropdownContent.appendChild(editBtn);
+
+          // Tombol Delete
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Hapus";
+          deleteBtn.onclick = function () {
+            deleteData(index);
+          };
+          dropdownContent.appendChild(deleteBtn);
+
+          dropdown.appendChild(dropdownContent);
+          tdAksi.appendChild(dropdown);
+          tr.appendChild(tdAksi);
+
+          tableBody.appendChild(tr);
+        });
+      }
+
+      // Fungsi untuk memformat tanggal dari YYYY-MM-DD ke DD-MM-YYYY
+      function formatDate(dateStr) {
+        if (!dateStr) return "-";
+        const [year, month, day] = dateStr.split("-");
+        return `${day}-${month}-${year}`;
+      }
+
+      // Fungsi untuk menampilkan gambar dalam modal
+      function showImage(base64Image) {
+        const modal = document.getElementById("imageModal");
+        const preview = document.getElementById("imagePreview");
+
+        if (!base64Image) {
+          alert("Gambar tidak tersedia");
+          return;
+        }
+
+        try {
+          // Cek apakah data adalah URL gambar
+          if (base64Image.startsWith("http")) {
+            preview.src = base64Image;
+          } else {
+            // Jika data adalah base64
+            const cleanedImage = base64Image.replace(
+              /^data:image\/(png|jpeg|jpg);base64,/,
+              ""
+            );
+            preview.src = `data:image/jpeg;base64,${cleanedImage}`;
+          }
+          modal.style.display = "block";
+        } catch (error) {
+          console.error("Error menampilkan gambar:", error);
+          alert("Gagal menampilkan gambar");
+        }
+      }
+
+      // Fungsi untuk menampilkan modal edit
+      async function editData(index) {
+        try {
+          const script = document.createElement("script");
+          const callbackName =
+            "editCallback_" + Math.round(Math.random() * 1000000);
+
+          window[callbackName] = function (response) {
+            if (response.status === "success") {
+              const data = response.data;
+              document.getElementById("edit_nama").value = data.nama;
+              document.getElementById("edit_nik").value = data.nik;
+              document.getElementById("edit_tgl_lahir").value =
+                formatDateForInput(data.tgl_lahir);
+              document.getElementById("edit_alamat").value = data.alamat;
+              document.getElementById("edit_no_hp").value = data.no_hp;
+
+              const editModal = document.getElementById("editModal");
+              editModal.style.display = "block";
+
+              // Simpan index yang sedang diedit
+              // Hitung index sebenarnya berdasarkan pagination
+              const actualIndex = (currentPage - 1) * itemsPerPage + index + 2;
+              editModal.dataset.editIndex = actualIndex;
+            } else {
+              alert("Gagal memuat data: " + response.message);
+            }
+            document.body.removeChild(script);
+            delete window[callbackName];
+          };
+
+          // Hitung index sebenarnya berdasarkan pagination
+          const actualIndex = (currentPage - 1) * itemsPerPage + index + 2;
+
+          script.src = `https://script.google.com/macros/s/AKfycbzTSe1XSCn4UyOaPT28Bvp4CRBrh2Zk_mdHzYbcdh34DCGfFG5UuQVhbDQl02i9Xc9SMA/exec?action=editData&index=${actualIndex}&callback=${callbackName}`;
+          document.body.appendChild(script);
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Gagal memuat data untuk edit");
+        }
+      }
+
+      // Fungsi untuk memformat tanggal untuk input date
+      function formatDateForInput(dateStr) {
+        const [day, month, year] = dateStr.split("/");
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      }
+
+      // Event listener untuk form edit
+      document
+        .getElementById("editForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const editModal = document.getElementById("editModal");
+          const index = parseInt(editModal.dataset.editIndex);
+
+          try {
+            const script = document.createElement("script");
+            const callbackName =
+              "saveEditCallback_" + Math.round(Math.random() * 1000000);
+
+            window[callbackName] = function (response) {
+              if (response.status === "success") {
+                alert("Data berhasil diperbarui");
+                editModal.style.display = "none";
+                loadData(); // Muat ulang data
+              } else {
+                alert("Gagal memperbarui data: " + response.message);
+              }
+              document.body.removeChild(script);
+              delete window[callbackName];
+            };
+
+            const formData = {
+              action: "saveEdit", // Ubah action menjadi saveEdit
+              index: index,
+              nama: document.getElementById("edit_nama").value,
+              nik: document.getElementById("edit_nik").value,
+              tgl_lahir: document.getElementById("edit_tgl_lahir").value,
+              alamat: document.getElementById("edit_alamat").value,
+              no_hp: document.getElementById("edit_no_hp").value,
+            };
+
+            // Ubah URL dan parameter
+            script.src = `https://script.google.com/macros/s/AKfycbzTSe1XSCn4UyOaPT28Bvp4CRBrh2Zk_mdHzYbcdh34DCGfFG5UuQVhbDQl02i9Xc9SMA/exec?action=saveEdit&data=${encodeURIComponent(
+              JSON.stringify(formData)
+            )}&callback=${callbackName}`;
+            document.body.appendChild(script);
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Gagal menyimpan perubahan");
+          }
+        });
+
+      // Tutup modal edit
+      document.querySelectorAll(".modal .close").forEach(function (closeBtn) {
+        closeBtn.onclick = function () {
+          this.closest(".modal").style.display = "none";
+        };
+      });
+
+      // Event listener untuk menutup modal
+      document.querySelectorAll(".close").forEach((closeBtn) => {
+        closeBtn.addEventListener("click", function () {
+          document.getElementById("imageModal").style.display = "none";
+          document.getElementById("editModal").style.display = "none";
+        });
+      });
+
+      // Event listener untuk toggle kolom
+      document.querySelectorAll(".column-toggle input").forEach((checkbox) => {
+        const column = checkbox.getAttribute("data-column");
+        const field = checkbox.getAttribute("data-field");
+
+        // Ambil status kolom dari server saat halaman dimuat
+        fetch(
+          `https://script.google.com/macros/s/AKfycbzTSe1XSCn4UyOaPT28Bvp4CRBrh2Zk_mdHzYbcdh34DCGfFG5UuQVhbDQl02i9Xc9SMA/exec?action=getFieldStatus&field=${field}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data && data.status !== undefined) {
+              checkbox.checked = data.status === true;
+
+              // Terapkan status tampilan kolom
+              document.querySelectorAll(`.col-${column}`).forEach((cell) => {
+                cell.style.display = checkbox.checked ? "" : "none";
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching field status:", error);
+          });
+
+        checkbox.addEventListener("change", function () {
+          // Simpan status checkbox ke server
+          const script = document.createElement("script");
+          const callbackName =
+            "saveFieldCallback_" + Math.round(Math.random() * 1000000);
+
+          window[callbackName] = function (response) {
+            if (response.status === "success") {
+              console.log(`Status kolom ${field} berhasil disimpan`);
+            } else {
+              console.error(
+                `Gagal menyimpan status kolom ${field}:`,
+                response.message
+              );
+              // Kembalikan status checkbox jika gagal
+              checkbox.checked = !checkbox.checked;
+            }
+            document.body.removeChild(script);
+            delete window[callbackName];
+          };
+
+          script.src = `https://script.google.com/macros/s/AKfycbzTSe1XSCn4UyOaPT28Bvp4CRBrh2Zk_mdHzYbcdh34DCGfFG5UuQVhbDQl02i9Xc9SMA/exec?action=saveFieldStatus&field=${field}&status=${this.checked}&callback=${callbackName}`;
+          document.body.appendChild(script);
+
+          // Terapkan status tampilan kolom
+          document.querySelectorAll(`.col-${column}`).forEach((cell) => {
+            cell.style.display = this.checked ? "" : "none";
+          });
+        });
+      });
+
+      // Fungsi untuk menghapus data
+      async function deleteData(index) {
+        if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+          try {
+            const script = document.createElement("script");
+            const callbackName =
+              "deleteCallback_" + Math.round(Math.random() * 1000000);
+
+            window[callbackName] = function (response) {
+              if (response.status === "success") {
+                alert("Data berhasil dihapus");
+                loadData(); // Muat ulang data
+              } else {
+                alert("Gagal menghapus data: " + response.message);
+              }
+              document.body.removeChild(script);
+              delete window[callbackName];
+            };
+
+            // Hitung index sebenarnya berdasarkan pagination
+            const actualIndex = (currentPage - 1) * itemsPerPage + index + 2;
+
+            script.src = `https://script.google.com/macros/s/AKfycbzTSe1XSCn4UyOaPT28Bvp4CRBrh2Zk_mdHzYbcdh34DCGfFG5UuQVhbDQl02i9Xc9SMA/exec?action=deleteData&index=${actualIndex}&callback=${callbackName}`;
+            document.body.appendChild(script);
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Gagal menghapus data");
+          }
+        }
+      }
+
+      // Muat data saat halaman dimuat
+      window.addEventListener("load", loadData);
+    </script>
+  </body>
+</html>
