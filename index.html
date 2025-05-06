@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form Pendaftaran</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+
+      /* Tambahkan di bagian style */
+      .ktp-note {
+        font-size: 15px;
+        color: #0f0f0f;
+        margin-top: 5px;
+        font-style: italic;
+      }
+
+      .container {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      input[type="text"],
+      input[type="date"],
+      input[type="tel"],
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      textarea {
+        height: 100px;
+        resize: vertical;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      #loading {
+        display: none;
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .alert {
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 4px;
+        display: none;
+      }
+
+      .alert-success {
+        background-color: #dff0d8;
+        color: #3c763d;
+        border: 1px solid #d6e9c6;
+      }
+
+      .alert-error {
+        background-color: #f2dede;
+        color: #a94442;
+        border: 1px solid #ebccd1;
+      }
+    </style>
+    <style>
+      /* Style untuk preview KTP dan Pas Foto */
+      #ktpPreview,
+      #pasfotoPreview {
+        margin-top: 10px;
+        max-width: 100%;
+      }
+
+      #previewImage,
+      #previewPasfoto {
+        display: none;
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Form Pendaftaran</h1>
+      <form id="registrationForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="nama">Nama Lengkap:</label>
+          <input type="text" id="nama" name="nama" required />
+        </div>
+
+        <div class="form-group">
+          <label for="nik">Nomor NIK:</label>
+          <input
+            type="text"
+            id="nik"
+            name="nik"
+            required
+            pattern="[0-9]{16}"
+            title="NIK harus 16 digit angka"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="ktp">Foto KTP:</label>
+          <div class="ktp-note">
+            foto ktp terlihat jelas dan tidak ada bayangan dan cahaya
+          </div>
+          <input type="file" id="ktp" name="ktp" accept="image/*" required />
+          <div id="ktpPreview">
+            <img id="previewImage" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="pasfoto">Pas Foto:</label>
+          <div class="ktp-note">pas foto berukuran 3x4 dan terlihat jelas</div>
+          <input
+            type="file"
+            id="pasfoto"
+            name="pasfoto"
+            accept="image/*"
+            required
+          />
+          <div id="pasfotoPreview">
+            <img id="previewPasfoto" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tgl_lahir">Tanggal Lahir:</label>
+          <input type="date" id="tgl_lahir" name="tgl_lahir" required />
+        </div>
+
+        <div class="form-group">
+          <label for="alamat">Alamat:</label>
+          <textarea id="alamat" name="alamat" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="no_hp">Nomor HP:</label>
+          <input
+            type="tel"
+            id="no_hp"
+            name="no_hp"
+            required
+            pattern="[0-9]{10,13}"
+            title="Nomor HP harus 10-13 digit"
+          />
+        </div>
+
+        <button type="submit">Kirim Pendaftaran</button>
+      </form>
+
+      <div id="loading">Mengirim data...</div>
+      <div id="successAlert" class="alert alert-success">
+        Data berhasil disimpan!
+      </div>
+      <div id="errorAlert" class="alert alert-error">
+        Terjadi kesalahan. Silakan coba lagi.
+      </div>
+    </div>
+
+    <script>
+      // Tambahkan API key Gemini
+      const GEMINI_API_KEY = "AIzaSyA1Vo9Jc2x5BW_jsNZxxWZMkbfNO9R0eO4";
+
+      // Fungsi untuk mengekstrak data dari KTP menggunakan Gemini AI
+      async function extractKTPData(imageBase64) {
+        try {
+          const response = await fetch(
+            "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=" +
+              GEMINI_API_KEY,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      {
+                        inlineData: {
+                          mimeType: "image/jpeg",
+                          data: imageBase64.split(",")[1],
+                        },
+                      },
+                      {
+                        text: 'tolong ambilkan Nik:" ", Nama:" ", Alamat:" ".',
+                      },
+                    ],
+                  },
+                ],
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Response from Gemini:", data);
+
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          console.log("Extracted text:", text);
+
+          if (!text) {
+            throw new Error("Tidak ada teks yang diekstrak dari gambar");
+          }
+
+          // Perbaikan regex untuk ekstraksi NIK
+          const nikMatch = text.match(/NIK[*:\s]+([0-9]+)/);
+          const namaMatch = text.match(/Nama[*:\s]+([^\n]+)/);
+          const alamatMatch = text.match(/Alamat[*:\s]+([^\n]+)/);
+
+          // Log untuk debugging
+          console.log("NIK Match:", nikMatch);
+          console.log("Nama Match:", namaMatch);
+          console.log("Alamat Match:", alamatMatch);
+
+          const ktpData = {
+            nik: nikMatch ? nikMatch[1].replace(/[^0-9]/g, "") : "",
+            nama: namaMatch ? namaMatch[1].trim() : "",
+            alamat: alamatMatch ? alamatMatch[1].trim() : "",
+          };
+
+          // Log data yang akan digunakan untuk mengisi form
+          console.log("Data yang akan diisi ke form:", ktpData);
+
+          // Validasi NIK harus 16 digit
+          if (ktpData.nik && ktpData.nik.length !== 16) {
+            console.warn("NIK tidak valid:", ktpData.nik);
+            ktpData.nik = ktpData.nik.padStart(16, "0");
+          }
+
+          // Hapus karakter markdown dan spasi yang tidak diinginkan
+          ktpData.nama = ktpData.nama.replace(/[*]/g, "").trim();
+          ktpData.alamat = ktpData.alamat.replace(/[*]/g, "").trim();
+
+          return ktpData;
+        } catch (error) {
+          console.error("Error extracting KTP data:", error);
+          throw error;
+        }
+      }
+
+      // Tambahkan fungsi kompresi gambar
+      async function compressImage(file, maxSizeKB = 30) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = function (e) {
+            const img = new Image();
+            img.src = e.target.result;
+
+            img.onload = function () {
+              const canvas = document.createElement("canvas");
+              let width = img.width;
+              let height = img.height;
+
+              // Hitung rasio aspek untuk mempertahankan proporsi
+              const maxDimension = 800; // Maksimum dimensi
+              if (width > height && width > maxDimension) {
+                height *= maxDimension / width;
+                width = maxDimension;
+              } else if (height > maxDimension) {
+                width *= maxDimension / height;
+                height = maxDimension;
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // Mulai dengan kualitas tinggi dan kurangi sampai ukuran < 30KB
+              let quality = 1.0;
+              let base64 = canvas.toDataURL("image/jpeg", quality);
+
+              while (base64.length > maxSizeKB * 1024 && quality > 0.1) {
+                quality -= 0.1;
+                base64 = canvas.toDataURL("image/jpeg", quality);
+              }
+
+              resolve(base64);
+            };
+
+            img.onerror = reject;
+          };
+          reader.onerror = reject;
+        });
+      }
+
+      // Modifikasi event listener untuk file input KTP
+      document
+        .getElementById("ktp")
+        .addEventListener("change", async function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            try {
+              const compressedBase64 = await compressImage(file);
+              const previewImage = document.getElementById("previewImage");
+              previewImage.style.display = "block";
+              previewImage.src = compressedBase64;
+
+              // Simpan base64 yang sudah dikompresi untuk pengiriman nanti
+              window.base64KTP = compressedBase64;
+
+              // Proses ekstraksi data KTP dengan gambar yang sudah dikompresi
+              const ktpData = await extractKTPData(compressedBase64);
+
+              // Isi form dengan data yang diekstrak
+              document.getElementById("nik").value = ktpData.nik || "";
+              document.getElementById("nama").value = ktpData.nama || "";
+              document.getElementById("alamat").value = ktpData.alamat || "";
+            } catch (error) {
+              console.error("Error processing KTP:", error);
+              alert("Gagal memproses foto KTP. Silakan coba lagi.");
+            }
+          } else {
+            document.getElementById("previewImage").style.display = "none";
+            window.base64KTP = null;
+          }
+        });
+
+      // Modifikasi event listener untuk pas foto
+      document
+        .getElementById("pasfoto")
+        .addEventListener("change", async function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            try {
+              const compressedBase64 = await compressImage(file);
+              const previewPasfoto = document.getElementById("previewPasfoto");
+              previewPasfoto.style.display = "block";
+              previewPasfoto.src = compressedBase64;
+
+              // Simpan base64 yang sudah dikompresi untuk pengiriman nanti
+              window.base64Pasfoto = compressedBase64;
+            } catch (error) {
+              console.error("Error processing pas foto:", error);
+              alert("Gagal memproses pas foto. Silakan coba lagi.");
+            }
+          } else {
+            document.getElementById("previewPasfoto").style.display = "none";
+            window.base64Pasfoto = null;
+          }
+        });
+
+      // Modifikasi event listener form submission
+      document
+        .getElementById("registrationForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const loading = document.getElementById("loading");
+          const successAlert = document.getElementById("successAlert");
+          const errorAlert = document.getElementById("errorAlert");
+
+          loading.style.display = "block";
+          successAlert.style.display = "none";
+          errorAlert.style.display = "none";
+
+          try {
+            const formData = new FormData();
+
+            // Tambahkan data form secara manual
+            formData.append("tgl_input", new Date().toLocaleDateString());
+            formData.append("nama", document.getElementById("nama").value);
+            formData.append("nik", document.getElementById("nik").value);
+
+            // Gunakan base64 yang sudah dikompresi
+            if (!window.base64KTP) {
+              throw new Error("Foto KTP harus diupload");
+            }
+            formData.append("foto_ktp", window.base64KTP);
+
+            if (!window.base64Pasfoto) {
+              throw new Error("Pas foto harus diupload");
+            }
+            formData.append("pas_foto", window.base64Pasfoto);
+
+            // Tambahkan data lainnya
+            formData.append(
+              "tgl_lahir",
+              document.getElementById("tgl_lahir").value
+            );
+            formData.append("alamat", document.getElementById("alamat").value);
+            formData.append("no_hp", document.getElementById("no_hp").value);
+
+            // Kirim data ke server
+            const response = await fetch(
+              "https://script.google.com/macros/s/AKfycbya8Z09YtFvREmGhRt0HrNYqTp8a1xBeOb1Mq_BLgkSrCcdfq4dXhIyGo61kigmdB1kWA/exec",
+              {
+                method: "POST",
+                mode: "no-cors", // Gunakan mode no-cors
+                redirect: "follow",
+                headers: {
+                  "Content-Type": "text/plain;charset=utf-8",
+                },
+                body: JSON.stringify(Object.fromEntries(formData)),
+              }
+            );
+
+            // Karena menggunakan no-cors, kita tidak bisa mengakses response.ok
+            // Jadi kita anggap berhasil jika tidak ada error
+            successAlert.style.display = "block";
+            document.getElementById("registrationForm").reset();
+            document.getElementById("previewImage").style.display = "none";
+            document.getElementById("previewPasfoto").style.display = "none";
+          } catch (error) {
+            console.error("Error:", error);
+            errorAlert.style.display = "block";
+            errorAlert.textContent = `Terjadi kesalahan: ${error.message}`;
+          } finally {
+            loading.style.display = "none";
+          }
+        });
+    </script>
+  </body>
+</html>
